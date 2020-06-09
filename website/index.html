@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by TEMPLATED
+http://templated.co
+Released for free under the Creative Commons Attribution License
+
+Name       : Breadth 
+Description: A two-column, fixed-width design with dark color scheme.
+Version    : 1.0
+Released   : 20140331
+
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" type="text/css" media="all" />
+<link href="fonts.css" rel="stylesheet" type="text/css" media="all" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+crossorigin=""></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.2/papaparse.js"></script>
+<script>
+  function getData() {
+    var val;
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/donovantok/hello-world/master/lat_long.csv",
+        dataType: "text",
+        async: false,
+        success: function(data) {val = processData(data);}
+    });
+    return val;
+  }
+
+  function getClinics() {
+    var val;
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/donovantok/hello-world/master/clinic_lat_long.csv",
+        dataType: "text",
+        async: false,
+        success: function(data) {val = processData(data);}
+    });
+    return val;   
+  }
+
+  function processData(allText) {
+    var allTextLines = allText.split(/\r\n|\n/);
+    allTextLines = allTextLines.slice(0, allTextLines.length - 1);
+    for(i = 0; i < allTextLines.length; i++) {
+      allTextLines[i] = allTextLines[i].split(',');
+    }
+    return allTextLines;
+  }
+
+  function schoolChoice(info, nearest_clinic) {
+    var x = document.getElementById('myDIV');
+    var n = document.getElementById('nearby');
+    var c_n = document.getElementById('clinic_name');
+    var c_num = document.getElementById('clinic_number');
+    var c_add = document.getElementById('clinic_address');
+    var c_w = document.getElementById('website');
+    var r = document.getElementById('resources');
+    var s_r = document.getElementById('school_resources');
+    var y = document.getElementById('seeMore');
+    x.textContent = info[0];
+
+    n.textContent = "Nearest Clinic:";
+    c_n.textContent = (nearest_clinic != -1) ? nearest_clinic[0] : "N/A";
+    c_num.textContent = (nearest_clinic != -1) ? nearest_clinic[1] : "N/A";
+    c_add.textContent = (nearest_clinic != -1) ? nearest_clinic[2] : "N/A";
+    
+    if(c_w.childNodes.length > 0){c_w.removeChild(c_w.childNodes[0])}
+    if(nearest_clinic != -1){
+      c_w.innerHTML = 'Website';
+      c_w.setAttribute('href', nearest_clinic[3]);
+      c_w.setAttribute('target', '_blank');
+    } else {
+      c_w.innerHTML = '';
+      c_w.setAttribute('href', null);
+      c_w.setAttribute('target', null);
+    }
+
+    r.textContent = 'School Resoucres: ';
+    s_r.textContent = (info[11] != '') ? info[11].split(';') : "N/A";
+
+    y.style.display = 'inline';
+  }
+</script>
+
+<!--[if IE 6]><link href="default_ie6.css" rel="stylesheet" type="text/css" /><![endif]-->
+
+</head>
+<body>
+<div id="header-wrapper">
+  <div id="header" class="container">
+    <div id="logo">
+      <h1><a href="#">a—</a></h1>
+</div>
+    <div id="menu">
+      <ul>
+        <li class="current_page_item"><a href="#" accesskey="1" title="">Resources</a></li>
+        <li><a href="#" accesskey="2" title="">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="wrapper">
+  <div id="extra" class="container">
+    <div id="mapid" style="width: 100%; height: 650px; margin-left: auto; margin: auto;"></div>
+      <script>
+        var mymap = L.map('mapid').setView([36.7783, -119.4179], 6);
+
+        var data = getData();
+
+        var clinics = getClinics();
+
+        var clinic_marker = L.icon({
+          iconUrl: 'images/red.png',
+          iconShadow: 'images/marker-shadow.png',
+          iconAnchor: L.Icon.Default.prototype.options.iconAnchor,
+          iconSize: L.Icon.Default.prototype.options.iconSize,
+          popupAnchor: L.Icon.Default.prototype.options.popupAnchor,
+          shadowSize: L.Icon.Default.prototype.options.shadowSize,
+          tooltipAnchor: L.Icon.Default.prototype.options.tooltipAnchor,
+        });
+      
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+          maxZoom: 18,
+          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+            '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          id: 'mapbox/streets-v11',
+          tileSize: 512,
+          zoomOffset: -1
+        }).addTo(mymap);
+
+        for (school in data) {
+          L.marker([Number(data[school][1]), Number(data[school][2])]).addTo(mymap)
+            .bindPopup("<b>"+data[school][0]+"</b>").on('click', onSchoolClick);
+        }
+
+        for (clinic in clinics) {
+          L.marker([Number(clinics[clinic][4]), Number(clinics[clinic][5])], {icon: clinic_marker}).addTo(mymap)
+            .bindPopup("<b>"+clinics[clinic][0]+"</b>").on('click', onClinicClick);
+        }
+
+        function getSchoolInfo(x) {
+          var p = data.filter(function(el) {
+              return (el[0] === x);
+          });
+          if (p.length === 1) return p[0];
+          return -1;
+        }
+
+        function getClinicInfo(x) {
+          var p = clinics.filter(function(el) {
+              return (el[0] === x);
+          });
+          if (p.length === 1) return p[0];
+          return -1;
+        }
+      
+        function onSchoolClick(e) {
+          var school = String(e.target._popup._content).substring(3, String(e.target._popup._content).length - 4);
+          var index = String(getSchoolInfo(school)).split(',');
+          var nearest_clinic = getClinicInfo(index[6]);
+          schoolChoice(index, nearest_clinic);
+          var zoom = (mymap._zoom >= 10) ? mymap._zoom : 10;
+          mymap.setView([index[1], index[2]], zoom);
+        }
+
+        function onClinicClick(e) {
+          var clinic = String(e.target._popup._content).substring(3, String(e.target._popup._content).length - 4);
+          var index = String(getClinicInfo(clinic)).split(',');
+          var zoom = (mymap._zoom >= 10) ? mymap._zoom : 10;
+          mymap.setView([index[4], index[5]], zoom);
+        }
+      
+      </script>
+    <div id='clinicWrap'>
+      <h1 id='myDIV'></h1>
+      <table style="width:40%; margin:auto">
+        <tr>
+          <td id='nearby'></td>
+          <td id='clinic_name'></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td id='clinic_address'></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td id='clinic_number'></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><a id = 'website'></a></td>
+        </tr>
+        <tr>
+          <td id='resources'></td>
+          <td id='school_resources'></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+    <a href="more.html" class="button", style="display: none", id="seeMore">See More</a> 
+  </div>
+</div>
+
+<div id="copyright" class="container">
+  <p>&copy; Untitled. All rights reserved. | Photos by <a href="http://fotogrph.com/">Fotogrph</a> | Design by <a href="http://templated.co" rel="nofollow">TEMPLATED</a>.</p>
+</div>
+</body>
+</html>
