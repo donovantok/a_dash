@@ -1,2 +1,2 @@
 # a_dash
-CS 448P
+Reproductive rights information dashboard geared for college students.
